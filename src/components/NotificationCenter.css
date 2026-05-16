@@ -1,0 +1,436 @@
+:root {
+  /* hairline that sharpens to 0.5px on retina */
+  --hairline: 1px;
+
+  --nc-purple: #7a5cff;
+  --nc-purple-press: #6847ec;
+  --nc-purple-soft: rgba(122, 92, 255, 0.32);
+
+  /* neutral scale */
+  --nc-ink: #1c1c1e; /* names, targets, titles */
+  --nc-body: #87878d; /* connective copy */
+  --nc-meta: #9a9aa0; /* time / source */
+  --nc-faint: #c4c4c8; /* separators */
+
+  --nc-line: rgba(17, 17, 19, 0.06);
+  --nc-unread-bg: #f6f4fe;
+  --nc-unread-bg-hover: #f1edfd;
+  --nc-unread-line: rgba(122, 92, 255, 0.12);
+  --nc-hover: #fafafa;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  :root {
+    --hairline: 0.5px;
+  }
+}
+
+.nc {
+  width: 420px;
+  background: #fff;
+  border-radius: var(--radius-20);
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(17, 17, 19, 0.05),
+    0 1px 2px rgba(17, 17, 19, 0.04),
+    0 12px 24px -8px rgba(17, 17, 19, 0.08),
+    0 32px 56px -16px rgba(17, 17, 19, 0.12);
+}
+
+.nc-stack {
+  position: relative;
+}
+
+.nc-layer {
+  inset: 0;
+  transition:
+    opacity 280ms var(--resize-ease),
+    filter 280ms var(--resize-ease),
+    transform 280ms var(--resize-ease);
+  will-change: opacity, filter, transform;
+}
+.nc-layer[data-active="false"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.nc[data-open="false"] .nc-layer[data-role="collapsed"] {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0) scale(1);
+}
+.nc[data-open="false"] .nc-layer[data-role="expanded"] {
+  opacity: 0;
+  filter: blur(3px);
+  transform: translateY(10px) scale(0.985);
+}
+.nc[data-open="true"] .nc-layer[data-role="collapsed"] {
+  opacity: 0;
+  filter: blur(3px);
+  transform: translateY(-8px) scale(0.985);
+}
+.nc[data-open="true"] .nc-layer[data-role="expanded"] {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0) scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nc-layer {
+    transition: none !important;
+  }
+}
+
+/* ---------------- Collapsed ---------------- */
+.nc-collapsed {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  width: 100%;
+  text-align: left;
+}
+.nc-bell {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px; /* concentric with 20px card / 16px padding */
+  color: #6e6e76;
+  background: linear-gradient(180deg, #fcfcfd 0%, #eceef1 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 0 0 1px rgba(17, 17, 19, 0.05),
+    0 1px 2px rgba(17, 17, 19, 0.05);
+}
+.nc-collapsed-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.nc-collapsed-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.18px;
+  color: var(--nc-ink);
+  line-height: 20px;
+}
+.nc-pill {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  color: #fff;
+  background: var(--nc-purple);
+  padding: 3px 7px;
+  border-radius: var(--radius-full);
+  font-variant-numeric: tabular-nums;
+}
+.nc-collapsed-sub {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--nc-meta);
+  letter-spacing: -0.08px;
+}
+
+/* -------- Toggle = Align "Compact Button [1.1]" (node 203229:344201) -------- */
+.nc-toggle {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 7px; /* ≥4px breathing room between glyph and the round border */
+  border-radius: var(--radius-full);
+  border: 1px solid #ebebeb; /* stroke/soft-200 */
+  background: #fff;
+  color: #5c5c5c; /* text/sub-600 */
+  cursor: pointer;
+  box-shadow: 0 1px 2px 0 rgba(10, 13, 20, 0.03); /* regular-shadow/x-small */
+  transition:
+    background 150ms ease,
+    transform 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+.nc-toggle svg {
+  display: block;
+}
+/* keep the visual 24px but guarantee a 40×40 hit area */
+.nc-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
+}
+.nc-toggle:active {
+  transform: scale(0.92);
+}
+.nc-toggle:focus-visible {
+  outline: 2px solid #1c1c1e;
+  outline-offset: 2px;
+}
+
+/* ---- Expanded — Align "Notifications Header [1.1]" (node 203229:344194) ---- */
+.nc-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ebebeb; /* stroke/soft-200 */
+}
+.nc-header h2 {
+  flex: 1 1 auto;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.176px;
+  color: var(--nc-ink);
+}
+.nc-markread {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.084px;
+  color: var(--nc-meta);
+  padding: 6px 6px;
+  margin: -6px -6px;
+  border-radius: 8px;
+  transition:
+    color 150ms ease,
+    transform 140ms cubic-bezier(0.2, 0, 0, 1);
+}
+.nc-markread:active {
+  transform: scale(0.97);
+}
+.nc-markread:disabled {
+  color: #cdcdd2;
+  cursor: default;
+}
+.nc-markread:focus-visible {
+  outline: 2px solid #1c1c1e;
+  outline-offset: 1px;
+}
+
+/* list */
+.nc-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.nc-item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 14px 20px;
+  transition: background 150ms ease;
+}
+.nc-item + .nc-item {
+  box-shadow: inset 0 var(--hairline) 0 var(--nc-line);
+}
+
+@media (hover: hover) {
+  .nc-item:hover {
+    background: var(--nc-hover);
+  }
+  .nc-toggle:hover {
+    background: #e8e8eb;
+  }
+  .nc-markread:not(:disabled):hover {
+    color: var(--nc-ink);
+  }
+  .nc-btn-secondary:hover {
+    background: #fafafa;
+  }
+  .nc-btn-primary:hover {
+    background: var(--nc-purple-press);
+  }
+}
+
+/* split + staggered entrance */
+.nc[data-open="true"] .nc-item {
+  animation: nc-item-in 460ms var(--resize-ease) backwards;
+}
+@keyframes nc-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nc[data-open="true"] .nc-item {
+    animation: none;
+  }
+}
+
+.nc-avatar {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+.nc-avatar img,
+.nc-avatar-initials {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: block;
+  object-fit: cover;
+  /* image outline — pure-black low-opacity, never tinted */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+.nc-avatar-initials {
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2f8f5b;
+}
+.nc-online {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 11px;
+  height: 11px;
+  border-radius: var(--radius-full);
+  background: #34c759;
+  box-shadow: 0 0 0 2.5px #fff;
+}
+
+.nc-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: 16px;
+}
+.nc-text {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.084px;
+  color: var(--nc-body);
+  text-wrap: pretty;
+}
+.nc-text b {
+  font-weight: 500;
+  color: var(--nc-ink);
+}
+.nc-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0;
+  color: var(--nc-meta);
+}
+.nc-meta time {
+  font-variant-numeric: tabular-nums;
+}
+.nc-meta .nc-dotsep {
+  margin: 0 7px;
+  color: var(--nc-faint);
+}
+
+/* unread marker */
+.nc-unread-dot {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--nc-purple);
+}
+
+/* actions — exact Align-UI "Buttons [1.1]" spec (node 4316:45309) */
+.nc-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+.nc-btn {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.084px;
+  padding: 6px 14px;
+  border-radius: var(--radius-8); /* 8px */
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 140ms cubic-bezier(0.2, 0, 0, 1),
+    background 140ms ease;
+}
+.nc-btn:active {
+  transform: scale(0.96);
+}
+.nc-btn:focus-visible {
+  outline: 2px solid #1c1c1e;
+  outline-offset: 2px;
+}
+.nc-btn-secondary {
+  background: #fff;
+  color: var(--nc-body); /* #5c5c5c text/sub-600 */
+  border-color: #ebebeb; /* stroke/soft-200 */
+  box-shadow: 0 1px 2px 0 rgba(10, 13, 20, 0.03); /* regular-shadow/x-small */
+}
+.nc-btn-primary {
+  background: var(--nc-purple);
+  color: #fff;
+}
+.nc-resolved {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--nc-purple);
+}
+
+/* file */
+.nc-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 14.5px;
+  letter-spacing: -0.1px;
+  color: var(--nc-body);
+}
+.nc-file svg {
+  color: var(--nc-meta);
+}
+
+/* empty state */
+.nc-empty {
+  padding: 60px 24px 68px;
+  text-align: center;
+  color: var(--nc-meta);
+}
+.nc-empty-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  border-radius: var(--radius-full);
+  display: grid;
+  place-items: center;
+  background: #f4f4f5;
+  color: #b6b6bc;
+}
+.nc-empty h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--nc-ink);
+  margin-bottom: 4px;
+  text-wrap: balance;
+}
+.nc-empty p {
+  font-size: 14px;
+  text-wrap: pretty;
+}

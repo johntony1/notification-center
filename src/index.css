@@ -1,0 +1,122 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+/* ----------------------------------------------------------------------------
+   transitions-dev — universal install block (card resize + icon swap used here)
+---------------------------------------------------------------------------- */
+:root {
+  /* Card resize */
+  --resize-dur: 460ms;
+  --resize-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Icon swap */
+  --icon-swap-dur: 240ms;
+  --icon-swap-blur: 2px;
+  --icon-swap-start-scale: 0.25;
+  --icon-swap-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ---- Align-UI design tokens (from Figma) ---- */
+  --bg-white: #ffffff;
+  --text-strong: #171717;
+  --text-dark: #0e121b;
+  --text-secondary: #525866;
+  --text-sub: #5c5c5c;
+  --text-soft: #a3a3a3;
+  --primary-base: #335cff;
+  --stroke-soft: #ebebeb;
+  --faded-lighter: #f5f5f5;
+
+  --radius-20: 20px;
+  --radius-12: 12px;
+  --radius-10: 10px;
+  --radius-8: 8px;
+  --radius-4: 4px;
+  --radius-full: 999px;
+
+  --shadow-card: 0px 1px 1px 0.5px rgba(51, 51, 51, 0.04),
+    0px 3px 3px -1.5px rgba(51, 51, 51, 0.02),
+    0px 6px 6px -3px rgba(51, 51, 51, 0.04),
+    0px 12px 12px -6px rgba(51, 51, 51, 0.04),
+    0px 24px 24px -12px rgba(51, 51, 51, 0.04),
+    0px 48px 48px -24px rgba(51, 51, 51, 0.04),
+    0px 0px 0px 1px var(--faded-lighter);
+  --shadow-btn: 0px 1px 2px 0px rgba(10, 13, 20, 0.03);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-feature-settings: "ss11", "cv09";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background: radial-gradient(
+    120% 120% at 50% 0%,
+    #fbfbfc 0%,
+    #f1f2f4 60%,
+    #e9eaed 100%
+  );
+  color: var(--text-strong);
+}
+
+#root {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+/* ---- Card resize (transitions-dev 01) ---- */
+.t-resize {
+  transition:
+    width var(--resize-dur) var(--resize-ease),
+    height var(--resize-dur) var(--resize-ease);
+  will-change: width, height;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-resize {
+    transition: none !important;
+  }
+}
+
+/* ---- Icon swap (transitions-dev 09) ---- */
+.t-icon-swap {
+  position: relative;
+  display: inline-grid;
+}
+.t-icon-swap .t-icon {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  transition:
+    opacity var(--icon-swap-dur) var(--icon-swap-ease),
+    filter var(--icon-swap-dur) var(--icon-swap-ease),
+    transform var(--icon-swap-dur) var(--icon-swap-ease);
+  will-change: opacity, filter, transform;
+}
+.t-icon-swap[data-state="a"] .t-icon[data-icon="a"],
+.t-icon-swap[data-state="b"] .t-icon[data-icon="b"] {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+.t-icon-swap[data-state="a"] .t-icon[data-icon="b"],
+.t-icon-swap[data-state="b"] .t-icon[data-icon="a"] {
+  opacity: 0;
+  filter: blur(var(--icon-swap-blur));
+  transform: scale(var(--icon-swap-start-scale));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-icon-swap .t-icon {
+    transition: none !important;
+  }
+}
