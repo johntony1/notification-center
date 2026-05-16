@@ -19,8 +19,8 @@ export type Notification = {
 export const inbox: Notification[] = [
   {
     id: "i1",
-    avatar: "/assets/avatar-1.png",
-    avatarBg: "#dfe7ff",
+    avatar: "/assets/memoji-polly.png",
+    avatarBg: "#e6ecff",
     online: true,
     unread: true,
     parts: [
@@ -33,8 +33,8 @@ export const inbox: Notification[] = [
   },
   {
     id: "i2",
-    avatar: "/assets/avatar-2.png",
-    avatarBg: "#f3e2cf",
+    avatar: "/assets/memoji-james.png",
+    avatarBg: "#efe7dd",
     unread: true,
     parts: [
       { text: "James ", strong: true },
@@ -46,8 +46,8 @@ export const inbox: Notification[] = [
   },
   {
     id: "i3",
-    avatar: "/assets/avatar-3.png",
-    avatarBg: "#e7defb",
+    avatar: "/assets/memoji-mary.png",
+    avatarBg: "#ece6fb",
     online: true,
     parts: [
       { text: "Mary ", strong: true },
@@ -61,8 +61,8 @@ export const inbox: Notification[] = [
   },
   {
     id: "i4",
-    avatar: "/assets/avatar-4.png",
-    avatarBg: "#fde7c8",
+    avatar: "/assets/memoji-dima.png",
+    avatarBg: "#eceef1",
     parts: [
       { text: "Dima Phizeg ", strong: true },
       { text: "edited " },
@@ -74,8 +74,8 @@ export const inbox: Notification[] = [
   },
   {
     id: "i5",
-    avatar: "/assets/avatar-2.png",
-    avatarBg: "#f3e2cf",
+    avatar: "/assets/memoji-james.png",
+    avatarBg: "#efe7dd",
     parts: [
       { text: "James ", strong: true },
       { text: "created " },
@@ -91,8 +91,8 @@ export const inbox: Notification[] = [
 export const general: Notification[] = [
   {
     id: "g1",
-    avatar: "/assets/avatar-3.png",
-    avatarBg: "#e7defb",
+    avatar: "/assets/memoji-mary.png",
+    avatarBg: "#ece6fb",
     parts: [
       { text: "Mary ", strong: true },
       { text: "invited you to " },
@@ -116,8 +116,8 @@ export const general: Notification[] = [
   },
   {
     id: "g3",
-    avatar: "/assets/avatar-1.png",
-    avatarBg: "#dfe7ff",
+    avatar: "/assets/memoji-polly.png",
+    avatarBg: "#e6ecff",
     parts: [
       { text: "Polly ", strong: true },
       { text: "approved your request for " },
