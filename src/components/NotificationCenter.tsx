@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { inbox as inboxSeed, type Notification } from "./data";
 import { BellIcon, ChevronIcon, PaperclipIcon } from "./icons";
+import NotificationRow from "./NotificationRow";
 import "./NotificationCenter.css";
 
 export default function NotificationCenter() {
@@ -9,6 +10,21 @@ export default function NotificationCenter() {
   const [resolved, setResolved] = useState<
     Record<string, "accepted" | "declined">
   >({});
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<Set<string>>(new Set());
+
+  const deleteItem = (id: string) => {
+    setOpenId((cur) => (cur === id ? null : cur));
+    setRemoving((s) => new Set(s).add(id));
+    window.setTimeout(() => {
+      setItems((prev) => prev.filter((n) => n.id !== id));
+      setRemoving((s) => {
+        const next = new Set(s);
+        next.delete(id);
+        return next;
+      });
+    }, 320);
+  };
 
   const collapsedRef = useRef<HTMLDivElement>(null);
   const expandedRef = useRef<HTMLDivElement>(null);
@@ -28,7 +44,7 @@ export default function NotificationCenter() {
     if (expandedRef.current) ro.observe(expandedRef.current);
     document.fonts?.ready.then(measure).catch(() => {});
     return () => ro.disconnect();
-  }, [items, resolved, open]);
+  }, [items, resolved, open, removing]);
 
   const unreadCount = items.filter((n) => n.unread).length;
   const markAllRead = () =>
@@ -117,13 +133,22 @@ export default function NotificationCenter() {
 
             <div className="nc-list">
               {items.map((n, i) => (
-                <div
-                  className="nc-item"
+                <NotificationRow
                   key={n.id}
-                  data-unread={!!n.unread}
-                  style={{ animationDelay: `${i * 55}ms` }}
+                  open={openId === n.id}
+                  removing={removing.has(n.id)}
+                  onOpen={() => setOpenId(n.id)}
+                  onClose={() =>
+                    setOpenId((c) => (c === n.id ? null : c))
+                  }
+                  onDelete={() => deleteItem(n.id)}
                 >
-                  <div className="nc-avatar">
+                  <div
+                    className="nc-item"
+                    data-unread={!!n.unread}
+                    style={{ animationDelay: `${i * 55}ms` }}
+                  >
+                    <div className="nc-avatar">
                     {n.avatar ? (
                       <img
                         src={n.avatar}
@@ -203,10 +228,11 @@ export default function NotificationCenter() {
                     )}
                   </div>
 
-                  {n.unread && (
-                    <span className="nc-unread-dot" aria-hidden="true" />
-                  )}
-                </div>
+                    {n.unread && (
+                      <span className="nc-unread-dot" aria-hidden="true" />
+                    )}
+                  </div>
+                </NotificationRow>
               ))}
             </div>
           </div>
