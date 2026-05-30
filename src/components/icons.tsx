@@ -67,6 +67,28 @@ export function TrashIcon({ className, size = 22 }: IconProps) {
   );
 }
 
+/* archive box (line) — matches the line-icon aesthetic */
+export function ArchiveIcon({ className, size = 22 }: IconProps) {
+  return (
+    <svg
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="2.75" y="3.75" width="18.5" height="4.5" rx="1.25" />
+      <path d="M4.5 8.25V18a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V8.25" />
+      <path d="M9.75 12h4.5" />
+    </svg>
+  );
+}
+
 /* mingcute:attachment-2-line */
 export function PaperclipIcon({ className, size = 18 }: IconProps) {
   return (

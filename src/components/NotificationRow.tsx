@@ -1,25 +1,37 @@
-import { useRef, useState, type ReactNode, type PointerEvent } from "react";
-import { TrashIcon } from "./icons";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type PointerEvent,
+} from "react";
+import { ArchiveIcon, TrashIcon } from "./icons";
 
 const ACTION_W = 84; // resting reveal width
-const DELETE_RATIO = 0.45; // drag past 45% of the row → delete on release
+const ACT_RATIO = 0.45; // drag past 45% of the row → fire the action on release
 const AXIS_LOCK = 8; // px before we commit to an axis
 
 type Props = {
   open: boolean;
   removing: boolean;
+  dir?: "delete" | "archive"; // direction of the exit animation
+  hint?: boolean; // play a one-shot "you can swipe me" nudge
   onOpen: () => void;
   onClose: () => void;
   onDelete: () => void;
+  onArchive: () => void;
   children: ReactNode;
 };
 
 export default function NotificationRow({
   open,
   removing,
+  dir,
+  hint = false,
   onOpen,
   onClose,
   onDelete,
+  onArchive,
   children,
 }: Props) {
   const rowRef = useRef<HTMLDivElement>(null);
@@ -28,17 +40,26 @@ export default function NotificationRow({
   const didDrag = useRef(false);
   const down = useRef(false);
   const [drag, setDrag] = useState<number | null>(null); // px while dragging
+  const [hinting, setHinting] = useState(false);
+
+  // run the affordance nudge once each time the prop flips on
+  useEffect(() => {
+    if (hint) setHinting(true);
+  }, [hint]);
 
   const restX = open ? -ACTION_W : 0;
   const x = drag ?? restX;
-  // reveal progress drives the icon scale/opacity for that tactile feel
-  const progress = Math.min(1, Math.max(0, -x / ACTION_W));
-  const armed = rowRef.current
-    ? -x > rowRef.current.clientWidth * DELETE_RATIO
-    : false;
+  const swipe = x < -1 ? "left" : x > 1 ? "right" : "none";
+  // reveal progress drives each icon's scale/opacity for that tactile feel
+  const pDelete = Math.min(1, Math.max(0, -x / ACTION_W));
+  const pArchive = Math.min(1, Math.max(0, x / ACTION_W));
+  const w = rowRef.current?.clientWidth ?? 320;
+  const armedDelete = -x > w * ACT_RATIO;
+  const armedArchive = x > w * ACT_RATIO;
 
   function onPointerDown(e: PointerEvent<HTMLDivElement>) {
     if (e.button !== 0 || removing) return;
+    if (hinting) setHinting(false); // user took over — drop the demo
     down.current = true;
     start.current = { x: e.clientX, y: e.clientY };
     axis.current = "none";
@@ -59,9 +80,7 @@ export default function NotificationRow({
       e.currentTarget.setPointerCapture(e.pointerId);
     }
 
-    let next = restX + dx;
-    if (next > 0) next *= 0.35; // rubber-band the closed edge
-    setDrag(next);
+    setDrag(restX + dx);
   }
 
   function onPointerUp() {
@@ -70,13 +89,14 @@ export default function NotificationRow({
       axis.current = "none";
       return;
     }
-    const dragged = -(drag ?? restX);
-    const w = rowRef.current?.clientWidth ?? 320;
+    const pos = drag ?? restX;
+    const width = rowRef.current?.clientWidth ?? 320;
     axis.current = "none";
     setDrag(null);
 
-    if (dragged > w * DELETE_RATIO) onDelete();
-    else if (dragged > ACTION_W / 2) onOpen();
+    if (pos < -width * ACT_RATIO) onDelete();
+    else if (pos > width * ACT_RATIO) onArchive();
+    else if (pos < -ACTION_W / 2) onOpen();
     else onClose();
   }
 
@@ -86,8 +106,36 @@ export default function NotificationRow({
       className="nc-row"
       data-open={open}
       data-removing={removing}
-      data-armed={armed}
+      data-remove-dir={dir}
+      data-swipe={swipe}
+      data-armed-delete={armedDelete}
+      data-armed-archive={armedArchive}
+      data-hinting={hinting}
     >
+      {/* left band — revealed by swiping right */}
+      <button
+        type="button"
+        className="nc-row-archive"
+        aria-label="Archive notification"
+        tabIndex={-1}
+        onClick={onArchive}
+      >
+        <span
+          className="nc-row-action-icon"
+          style={
+            drag !== null && x > 0
+              ? {
+                  transform: `scale(${0.55 + 0.45 * pArchive})`,
+                  opacity: 0.4 + 0.6 * pArchive,
+                }
+              : undefined
+          }
+        >
+          <ArchiveIcon />
+        </span>
+      </button>
+
+      {/* right band — revealed by swiping left */}
       <button
         type="button"
         className="nc-row-delete"
@@ -96,12 +144,12 @@ export default function NotificationRow({
         onClick={onDelete}
       >
         <span
-          className="nc-row-delete-icon"
+          className="nc-row-action-icon"
           style={
-            drag !== null
+            drag !== null && x < 0
               ? {
-                  transform: `scale(${0.55 + 0.45 * progress})`,
-                  opacity: 0.4 + 0.6 * progress,
+                  transform: `scale(${0.55 + 0.45 * pDelete})`,
+                  opacity: 0.4 + 0.6 * pDelete,
                 }
               : undefined
           }
@@ -111,9 +159,10 @@ export default function NotificationRow({
       </button>
 
       <div
-        className="nc-row-fg"
+        className={`nc-row-fg${hinting ? " nc-hint" : ""}`}
         data-dragging={drag !== null}
         style={{ transform: `translate3d(${x}px,0,0)` }}
+        onAnimationEnd={() => setHinting(false)}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
